@@ -71,7 +71,7 @@ fileInput.addEventListener('change', async (e) => {
     statusMessage.textContent = 'Uploading...';
     statusMessage.style.color = '#2e8b57';
 
-    const response = await fetch('/upload', {
+    const response = await fetch('/api/upload', {
       method: 'POST',
       body: formData
     });
@@ -264,7 +264,7 @@ function displayFiles(files) {
 
             if (confirm(`Delete ${filename}?`)) {
                 try {
-                    const response = await fetch(`/files/${filename}`, {
+                    const response = await fetch(`/api/files/${filename}`, {
                         method: 'DELETE'
                     });
 
@@ -284,7 +284,7 @@ function displayFiles(files) {
 }
 async function loadFiles() {
     try {
-        const response = await fetch('/files');
+        const response = await fetch('/api/files');
         if (!response.ok) throw new Error('Server error');
         const data = await response.json();
         displayFiles(data.files);

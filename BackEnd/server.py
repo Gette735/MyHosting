@@ -10,21 +10,28 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 
-app.mount("/static", StaticFiles(directory="FrontEnd"), name="static")
-templates = Jinja2Templates(directory="FrontEnd")
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
+#app.mount("/static", StaticFiles(directory="FrontEnd"), name="static")
+#templates = Jinja2Templates(directory="FrontEnd")
+app.add_middleware(CORSMiddleware,
+    allow_origins=["http://localhost", "http://frontend"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+#@app.get("/", response_class=HTMLResponse)
+#async def home(request: Request):
+#    return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("F_page.html", {"request": request})
 
-
-@app.get("/hello")
+@app.get("/api/hello")
 def hello():
     return {"message": "Hello, this is my site!"}
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
-@app.post("/upload")
+
+@app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     if file.content_type not in ["image/jpeg"]:
         raise HTTPException(
@@ -61,7 +68,7 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 
-@app.get("/files")
+@app.get("/api/files")
 async def list_files():
     try:
         upload_dir = Path("uploads")
@@ -83,7 +90,7 @@ async def list_files():
             status_code=500,
             detail=f"Error retrieving file list: {str(e)}"
         )
-@app.delete("/files/{filename}")
+@app.delete("/api/files/{filename}")
 async def delete_file(filename: str):
     file_path = Path("uploads") / filename
     if not file_path.exists():
@@ -94,7 +101,7 @@ async def delete_file(filename: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Delite error: {str(e)}")
 
-@app.get("/uploads/{filename}")
+@app.get("/api/uploads/{filename}")
 async def get_file(filename: str):
     file_path = Path("uploads") / filename
     if not file_path.is_file():
